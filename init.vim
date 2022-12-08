@@ -134,6 +134,8 @@ Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
 Plug 'vim-test/vim-test', {'for': 'php'}
 Plug 'tpope/vim-dispatch', {'for': 'php'}
 Plug 'slamdunk/vim-compiler-phpunit', {'for': 'php'}
+
+Plug 'jpalardy/vim-slime'
 call plug#end()
 
 let g:coc_global_extensions = [
@@ -923,3 +925,57 @@ nmap <silent> <leader>g :TestVisit<CR>
 ":let test#php#phpunit#executable = 'docker run -it -v "${PWD}"":""${PWD}" -w "${PWD}" php:8.0-cli vendor/bin/phpunit'
 :let test#php#phpunit#executable = 'docker exec -w /www/web2 --user 1000:1000 -it -e SSH_AUTH_SOCK="${SSH_AUTH_SOCK}" php-fpm-backend ./vendor/bin/phpunit'
 let test#project_root = "~/Projects/src/web2/"
+
+
+"vim-slime
+let g:slime_target = "neovim"
+let g:slime_paste_file = "$HOME/.vim-slime-paste"
+let g:slime_no_mappings = 1
+let g:slime_default_config = {"socket_name": "default", "target_pane": "%"}
+let g:slime_dont_ask_default = 1
+
+function SlimeOverrideConfig()
+  let l:job_id = trim(execute(":echo b:terminal_job_id"))
+  wincmd h
+  let b:slime_config = {}
+  let b:slime_config["jobid"] = job_id
+endfunction
+
+function StartISQL()
+    :terminal
+    :$
+    :vertical resize 70
+    :call SlimeOverrideConfig()
+    :SlimeSend
+endfunction
+
+function StartSQL()
+"    :ToggleTermSendVisualSelection
+"    :SlimeSend
+    :ToggleTerm
+"    :call SlimeOverrideConfig()
+"    :SlimeSend
+endfunction
+
+
+function StartSQLTerm()
+    let s:name = expand('%:t')
+    :ToggleTerm direction=float size=100
+    :call SlimeOverrideConfig()
+    :TermExec cmd="ssh dbxa@qa.fundist.org -p1100"
+    if s:name == "wlcdevcasinodev.sql"
+        :TermExec cmd="use wlcdevcasinodev;"
+    endif
+    :ToggleTerm
+endfunction
+
+augroup openSqlFile | au!
+        autocmd! FileType sql if !exists('b:has_been_entered') | 
+    \ let b:has_been_entered = 1 | call StartSQLTerm() | endif 
+augroup END
+
+"autocmd Filetype sql nnoremap <leader>s :call StartSQL()<CR>
+
+
+xmap <leader>s <Plug>SlimeRegionSend
+nmap <leader>s <Plug>SlimeParagraphSend \| :call StartSQL()<CR>
