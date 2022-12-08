@@ -130,6 +130,10 @@ Plug 'folke/lsp-colors.nvim'
 Plug 'chentoast/marks.nvim'
 
 Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
+
+Plug 'vim-test/vim-test', {'for': 'php'}
+Plug 'tpope/vim-dispatch', {'for': 'php'}
+Plug 'slamdunk/vim-compiler-phpunit', {'for': 'php'}
 call plug#end()
 
 let g:coc_global_extensions = [
@@ -907,3 +911,15 @@ require("toggleterm").setup{
 }
 
 EOF
+
+nmap <silent> <leader>t :TestNearest<CR>
+nmap <silent> <leader>T :TestFile<CR>
+nmap <silent> <leader>a :TestSuite<CR>
+nmap <silent> <leader>l :TestLast<CR>
+nmap <silent> <leader>g :TestVisit<CR>
+
+"let test#php#phpunit#executable = 'phpunit'
+"let test#php#phpunit#executable = 'vendor/bin/phpunit'
+":let test#php#phpunit#executable = 'docker run -it -v "${PWD}"":""${PWD}" -w "${PWD}" php:8.0-cli vendor/bin/phpunit'
+:let test#php#phpunit#executable = 'docker exec -w /www/web2 --user 1000:1000 -it -e SSH_AUTH_SOCK="${SSH_AUTH_SOCK}" php-fpm-backend ./vendor/bin/phpunit'
+let test#project_root = "~/Projects/src/web2/"
